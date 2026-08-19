@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  streamlit:
+    build: ./app
+    container_name: streamlit_app
+    ports:
+      - "8501:8501"   # local access: http://localhost:8501
+    volumes:
+      - ./app:/app   # <--- THIS is the magic line
+    environment:
+      - STREAMLIT_SERVER_RUN_ON_SAVE=true
