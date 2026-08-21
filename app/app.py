@@ -1,6 +1,7 @@
 import streamlit as st
 from provider import GeminiProvider
 from pathlib import Path
+import asyncio
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -43,13 +44,32 @@ st.title("💬 Chatbot")
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
 
+# Render historical chat messages
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
 if prompt := st.chat_input():
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
-    response = client.generate(prompt, system=system_prompt, temperature=temperature)
-    msg = response.text
-    st.session_state.messages.append({"role": "assistant", "content": msg})
-    st.chat_message("assistant").write(msg)
+    with st.chat_message("assistant"):
+        async def stream_wrapper():
+            async for chunk in client.astream(
+                prompt, system=system_prompt, temperature=temperature
+            ):
+                yield chunk
+
+        def sync_generator():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            agen = stream_wrapper()
+            try:
+                while True:
+                    yield loop.run_until_complete(agen.__anext__())
+            except StopAsyncIteration:
+                pass
+            finally:
+                loop.close()
+        full_response = st.write_stream(sync_generator())
+
+    # Save complete response to session state
+    st.session_state.messages.append({"role": "assistant", "content": full_response})
