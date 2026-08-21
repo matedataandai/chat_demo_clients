@@ -1,8 +1,14 @@
 import streamlit as st
 from provider import GeminiProvider
+from pathlib import Path
 import os
 from dotenv import load_dotenv
 load_dotenv()
+
+file_path_icon = Path(__file__).parent.parent / "Logos32.32px.png"
+st.set_page_config(page_title="Business Chatbot", page_icon=file_path_icon, layout="wide")
+file_path_logo = Path(__file__).parent.parent / "poweredbymatedata.png"
+st.image(file_path_logo, width=400)
 
 client = GeminiProvider(api_key=os.getenv("GEMINI_API_KEY"), model=os.getenv("GEMINI_MODEL"))
 
