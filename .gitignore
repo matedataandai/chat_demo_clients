@@ -81,6 +81,7 @@ target/
 # IPython
 profile_default/
 ipython_config.py
+test.ipynb
 
 # pyenv
 #   For a library or package, you might want to ignore these files since the code is
@@ -216,3 +217,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# other files
+Coffee_sales.xlsx
